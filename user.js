@@ -52,8 +52,10 @@ class User {
       return { error: true, data: null, status: 403, message: "invalid data" };
   };
   get = async (userId) => {
-    const userId =
-      typeof "string" && userId.trim().length > 0 ? userId.trim() : false;
+    userId =
+      typeof userId == "string" && userId.trim().length > 0
+        ? userId.trim()
+        : false;
     if (userId) {
       try {
         const data = await _data.get("users", userId);
@@ -76,6 +78,42 @@ class User {
     } else {
       return { error: true, data: null, status: 403, message: "invalid data" };
     }
+  };
+
+  authenticate = async (id, password) => {
+    id = typeof id == "string" && id.trim().length !== 0 ? id : false;
+    password =
+      typeof password == "string" && password.trim().length !== 0
+        ? password
+        : false;
+
+    if (id && password) {
+      try {
+        const userData = await _data.get("users", id);
+        if (userData && userData.password === helpers.hash(password)) {
+          delete userData.password;
+          return {
+            error: false,
+            data: userData,
+            status: 200,
+            message: "success",
+          };
+        }
+      } catch (error) {
+        return {
+          error: true,
+          data: null,
+          status: 404,
+          message: "user does not exist",
+        };
+      }
+    } else
+      return {
+        error: true,
+        data: null,
+        status: 405,
+        message: "invalid data",
+      };
   };
 }
 

@@ -25,7 +25,8 @@ const posts = (currentRoute) => {
     req.on("end", () => {
       buffer += decoder.end();
 
-      const parsedJsonObject = JSON.parse(buffer);
+      const parsedJsonObject =
+        buffer.trim().length > 0 ? JSON.parse(buffer) : "";
       data.payload = parsedJsonObject;
       routes[currentRoute].post(data, (statusCode, resPayload) => {
         const stringPayload = JSON.stringify(resPayload);
@@ -38,12 +39,14 @@ const posts = (currentRoute) => {
     });
   });
 };
+
 const gets = (currentRoute) => {
   app.get(`/${currentRoute}`, (req, res) => {
     const data = {};
 
     data.headers = req.headers;
     data.query = req.query;
+    let buffer = "";
 
     const decoder = new stringDecoder("utf-8");
     req.on("data", (data) => {
@@ -116,24 +119,22 @@ const deletes = (currentRoute) => {
 };
 
 posts("users");
+posts("authenticate");
+
 // posts("tokens");
-// posts("tasks");
 
 // deletes("users");
 // deletes("tokens");
-// deletes("tasks");
 
 // puts("users");
 // puts("tokens");
-// puts("tasks");
 
-// gets("users");
+gets("users");
 // gets("tokens");
-// gets("tasks");
 
 const routes = {
   users: handlers.users,
-  tokens: handlers.tokens,
+  authenticate: handlers.authenticate,
 };
 
 app.listen(process.env.EXPRESS_PORT, () => {
